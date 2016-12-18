@@ -29,7 +29,7 @@ public class Data2Db {
 		Connection srcConn = ConnectSrcDb.getSrcConnection();
 		String issueId = null;
 		PreparedStatement pstmt = null;
-		String sql = "SELECT max(issue_id) FROM echart3.echart_heilongjiang_5in11_t";
+		String sql = "SELECT max(issue_id) FROM echart3.echart_heilongjiang_5in11_t where issue_id REGEXP '^[0-9]{8}$'";
 		try {
 			pstmt = (PreparedStatement) srcConn.prepareStatement(sql);
 			ResultSet rs = pstmt.executeQuery();

@@ -39,7 +39,7 @@ public class ConnectSrcDb {
 			pr.put("characterEncoding", "GB2312");
 			pr.put("useUnicode", "TRUE");
 			Class.forName(driver).newInstance();
-			LogUtil.info("源数据库连接成功！");
+//			LogUtil.info("源数据库连接成功！");
 			return DriverManager.getConnection(url, pr);
 		} catch (Exception se) {
 			se.printStackTrace();

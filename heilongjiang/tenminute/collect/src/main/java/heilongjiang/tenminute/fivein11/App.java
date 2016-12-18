@@ -1,6 +1,9 @@
 package heilongjiang.tenminute.fivein11;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class App {
 	
@@ -9,15 +12,15 @@ public class App {
 	 * 执行方法入口
 	 */
 	public static void main(String[] args) {
-		/*	Timer timer = new Timer();
+		Timer timer = new Timer();
 		timer.schedule(new TimerTask() {
 			@Override
 			public void run() {
 				collectData();
 			}
 		}, new Date(), 1000 * 5);// 每隔5秒搜索一次
-		*/
-			insertTestData();
+		
+//			insertTestData();
 	}
 	/*
 	 * 初始化遗漏统计表结构，初始化过后不再使用，注释掉
@@ -77,7 +80,7 @@ public class App {
 			data2Db.insertBaseData(srcDataBean);
 		}
 	}
-	
+	/*
 	private static void insertTestData(){
 		Data2Db data2Db = new Data2Db();
 		List<SrcDataBean> dataList = data2Db.getAllRecords();
@@ -87,6 +90,7 @@ public class App {
 			data2Db.insertBaseData(srcDataBean);
 		}
 	}
+	*/
 }
 		
 		

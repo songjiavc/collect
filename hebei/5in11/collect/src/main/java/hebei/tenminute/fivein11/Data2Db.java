@@ -29,7 +29,7 @@ public class Data2Db {
 		Connection srcConn = ConnectSrcDb.getSrcConnection();
 		String issueId = null;
 		PreparedStatement pstmt = null;
-		String sql = "SELECT max(issue_id) FROM echart3.echart_hebei_11xuan5_t";
+		String sql = "SELECT max(issue_id) FROM echart3.echart_hebei_11xuan5_t where issue_id REGEXP '^[0-9]{8}$'";
 		try {
 			pstmt = (PreparedStatement) srcConn.prepareStatement(sql);
 			ResultSet rs = pstmt.executeQuery();
@@ -220,7 +220,7 @@ public class Data2Db {
 		try{
 			if(!haveDataInIssueId(srcDataBean.getIssueId(),conn)){
 				insertData(srcDataBean,conn);
-				LogUtil.info(srcDataBean.getIssueId()+"插入成功!");
+//				LogUtil.info(srcDataBean.getIssueId()+"插入成功!");
 			}
 		}catch (SQLException e) {
 			flag = false;

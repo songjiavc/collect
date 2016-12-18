@@ -10,6 +10,7 @@ import java.util.TimerTask;
 
 import com.mysql.jdbc.StringUtils;
 
+
 public class App {
 	
 	static String maxIssueId = "16091979";
@@ -74,15 +75,14 @@ public class App {
 	  * @date Feb 15, 2016 11:31:49 AM  
 	  */
 	private static void collectData(){
+
 		Data2Db data2Db = new Data2Db();
-		// 将源数据库中数据插入到目的库中
-		if(StringUtils.isNullOrEmpty(maxIssueId)){
-			maxIssueId = data2Db.findMaxIssueIdFromDesDb();
-		}
-		SrcDataBean srcData = data2Db.getRecordByIssueId(getNextIssueNumber(maxIssueId));
-		if(!StringUtils.isNullOrEmpty(srcData.getIssueId())){
-			maxIssueId = srcData.getIssueId();
-			data2Db.insertBaseData(srcData);
+		String maxIssueNumber = data2Db.findMaxIssueIdFromSrcDb();
+		if(!maxIssueId.equals(maxIssueNumber)){
+			maxIssueId = maxIssueNumber;
+			// 将源数据库中数据插入到目的库中
+			SrcDataBean srcDataBean = data2Db.getRecordByIssueId(maxIssueId);
+			data2Db.insertBaseData(srcDataBean);
 		}
 	}
 	/**
