@@ -77,7 +77,7 @@ public class App {
 		String maxIssueNumber = data2Db.findMaxIssueIdFromSrcDb();
 		if(!maxIssueId.equals(maxIssueNumber)){
 			maxIssueId = maxIssueNumber;
-			startDanMa(maxIssueId);                //胆码计算放发组开始
+			startDanMa(maxIssueId);              //胆码计算放发组开始
 			// 四码复式计算组  
 			startSiMa(maxIssueId);
 			//同码预测
@@ -98,7 +98,7 @@ public class App {
 			// 预测下一期内容
 			String nextIssueNumber = getNextIssueByCurrentIssue(issueNumber);
 			data2Db.execDanMa(nextIssueNumber);
-			LogUtil.info(issueNumber+"预测成功！",App.province+"/danma");
+//			LogUtil.info(issueNumber+"预测成功！",App.province+"/danma");
 		}catch(SQLException sqlEx){
 			sqlEx.printStackTrace();
 			LogUtil.error(issueNumber+"预测失败！"+sqlEx.getMessage(),App.province+"/danma");
@@ -116,7 +116,7 @@ public class App {
 			   if(nextIssue == 0){
 				  return issueNumber.substring(0,issueNumber.length()-2)+App.lineCount;
 			   }else if(nextIssue == 1 ){
-				   return DateUtil.getNextDay(issueNumber.substring(0,issueNumber.length()-2)) + "001";
+				   return DateUtil.getNextDay(issueNumber.substring(0,issueNumber.length()-3)) + "001";
 			   }else{
 				   return issueNumber.substring(0,issueNumber.length()-2)+"0"+nextIssue;
 			   }
