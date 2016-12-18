@@ -116,7 +116,7 @@ public class App {
 			   if(nextIssue == 0){
 				  return issueNumber.substring(0,issueNumber.length()-2)+App.lineCount;
 			   }else if(nextIssue == 1 ){
-				   return DateUtil.getNextDay() + "001";
+				   return DateUtil.getNextDay(issueNumber.substring(0,issueNumber.length()-2)) + "001";
 			   }else{
 				   return issueNumber.substring(0,issueNumber.length()-2)+"0"+nextIssue;
 			   }
