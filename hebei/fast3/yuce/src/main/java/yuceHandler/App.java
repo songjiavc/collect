@@ -2,6 +2,8 @@ package yuceHandler;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Date;
@@ -53,6 +55,7 @@ public class App {
         
 	}
 	
+	
 	/*
 	 * 执行方法入口
 	 */
@@ -66,7 +69,6 @@ public class App {
 			}
 		}, new Date(), 1000 * 20);// 每隔20秒输出
 	}
-
 	/** 
 	  * @Description: 
 	  * @author songjia
@@ -74,15 +76,21 @@ public class App {
 	  */
 	private static void execData(){
 		Data2Db data2Db = new Data2Db();
-		String maxIssueNumber = data2Db.findMaxIssueIdFromSrcDb();
-		if(!maxIssueId.equals(maxIssueNumber)){
-			maxIssueId = maxIssueNumber;
-			startDanMa(maxIssueId);              //胆码计算放发组开始
-			// 四码复式计算组  
-			startSiMa(maxIssueId);
-			//同码预测
-	   		startSameNumber(maxIssueId);
-		}
+		String maxIssueNumber = null;
+		try{
+			maxIssueNumber = data2Db.findMaxIssueIdFromSrcDb();
+			if(!maxIssueId.equals(maxIssueNumber)){
+				maxIssueId = maxIssueNumber;
+				startDanMa(maxIssueId);              //胆码计算放发组开始
+				// 四码复式计算组  
+				startSiMa(maxIssueId);
+				//同码预测
+		   		startSameNumber(maxIssueId);
+			}
+		}catch (Exception e){
+            String info = getErrorInfoFromException(e);
+            LogUtil.error(maxIssueNumber+"预测失败！"+info,App.province+"/danma");
+        }
 	}
  	
 	/**
@@ -104,7 +112,18 @@ public class App {
 			LogUtil.error(issueNumber+"预测失败！"+sqlEx.getMessage(),App.province+"/danma");
 		}
 	}
-	
+	      
+	    public static String getErrorInfoFromException(Exception e) {  
+	        try {  
+	            StringWriter sw = new StringWriter();  
+	            PrintWriter pw = new PrintWriter(sw);  
+	            e.printStackTrace(pw);  
+	            return "\r\n" + sw.toString() + "\r\n";  
+	        } catch (Exception e2) {  
+	            return "bad getErrorInfoFromException";  
+	        }  
+	    }  
+
 	
 	   public static String getNextIssueByCurrentIssue(String issueNumber){
 		   String issueCode = issueNumber.substring(issueNumber.length()-2,issueNumber.length());
@@ -124,6 +143,8 @@ public class App {
 	   }
 	   
 	   
+	   
+	   
    /**
     * @param issueNumber
     * 计算噝码复式开始
@@ -134,9 +155,8 @@ public class App {
 	     //undo 判断是否中出
 		   Data2DbSima data2DbSima = new Data2DbSima();
 		   data2DbSima. execDrawnSima(issueNumber);
-			LogUtil.info(issueNumber+"预测成功！",App.province+"/sima");
 	   }catch(SQLException sqlEx){
-		   LogUtil.info(issueNumber+"预测失败！",App.province+"/sima");
+		   LogUtil.error(issueNumber+"预测失败！",App.province+"/sima");
 	   }
 	 }
    
@@ -145,13 +165,10 @@ public class App {
 	   try{
 		   Data2DbSameNumber data2DbSameNumber = new Data2DbSameNumber();
 		   data2DbSameNumber.execSameNum(issueNumber);
-		   LogUtil.info(issueNumber+"预测成功！",App.province+"/same");
 	   }catch(SQLException sqlEx){
 		   sqlEx.printStackTrace();
 		   LogUtil.error(issueNumber+"预测失败！",App.province+"/same");
-	   }catch(Exception e){
-		   e.printStackTrace();
 	   }
-	   }
+   }
    
 }
