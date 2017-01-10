@@ -47,37 +47,6 @@ public class Data2Db {
 	}
 	
 	
-	/** 
-	  * @Description: 根据期号在源数据库中获取记录
-	  * @author songj@sdfcp.com
-	  * @date Feb 15, 2016 4:24:40 PM 
-	  * @param issueId
-	  * @return 
-	  */
-	public List<SrcDataBean> getAllRecord(){
-		Connection srcConn = ConnectSrcDb.getSrcConnection();
-		List<SrcDataBean> srcList = new ArrayList<SrcDataBean>();
-		PreparedStatement pstmt = null;
-		String sql = "SELECT issue_id,no_1,no_2,no_3 FROM echart3.echart_anhui_kuai3_t";
-		try {
-			pstmt = (PreparedStatement) srcConn.prepareStatement(sql);
-			ResultSet rs = pstmt.executeQuery();
-			while(rs.next()){
-				SrcDataBean srcDataBean = new SrcDataBean();
-				srcDataBean.setIssueId(rs.getString(1));
-				srcDataBean.setNo1(rs.getInt(2));
-				srcDataBean.setNo2(rs.getInt(3));
-				srcDataBean.setNo3(rs.getInt(4));
-				srcList.add(srcDataBean);
-			}
-			if(rs != null && !rs.isClosed()){
-				rs.close();
-			}
-		} catch (SQLException e) {
-			LogUtil.error(e.getMessage());
-		}
-		return srcList;
-	}
 	
 	/** 
 	  * @Description: 根据期号在源数据库中获取记录
@@ -179,50 +148,6 @@ public class Data2Db {
 		}
 	}
 	
-	/** 
-	  * @Description:  
-	  * @author songj
-	  * @date Feb 15, 2016 4:00:04 PM 
-	  * @param issue_id
-	  * @param one
-	  * @param two
-	  * @param three
-	  * @param conn
-	  * @throws SQLException 
-	  */
-	private void insertData(SrcDataBean srcDataBean,Connection conn) throws SQLException{
-		String sql = "INSERT INTO T_LN_5IN11_NUMBER (issue_number,no1,no2,no3,no4,no5,three_sum,three_span,five_sum,three_span,big_count,odd_count,create_time,origin) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-		PreparedStatement pstmt = null;
-		try {
-			pstmt = (PreparedStatement) conn.prepareStatement(sql);
-			pstmt.setString(1, srcDataBean.getIssueId());
-			pstmt.setInt(2, srcDataBean.getNo1());
-			pstmt.setInt(3, srcDataBean.getNo2());
-			pstmt.setInt(4, srcDataBean.getNo3());
-			pstmt.setInt(5, srcDataBean.getNo4());
-			pstmt.setInt(6, srcDataBean.getNo5());
-			pstmt.setInt(7, srcDataBean.getThreeSum());
-			pstmt.setInt(8, srcDataBean.getThreeSpan());
-			pstmt.setInt(9, srcDataBean.getFiveSum());
-			pstmt.setInt(10, srcDataBean.getFiveSpan());
-			pstmt.setInt(11, srcDataBean.getBigCount());
-			pstmt.setInt(12, srcDataBean.getOddNum());
-			pstmt.setTimestamp(13, new java.sql.Timestamp(new Date().getTime()));
-			pstmt.setInt(14, 1);
-			pstmt.executeUpdate();
-		} catch (SQLException e) {
-			LogUtil.error("插入基础数据表异常!"+e.getCause());
-		}finally{
-			if(!pstmt.isClosed() && pstmt != null){
-				pstmt.close();
-			}
-		}
-		
-		
-	}
-	
-	
-	
 	public void insertTestGroupData(String issueNumber,String groupNumber,int currentMiss,int maxMiss,int type) throws SQLException{
 		Connection conn = ConnectDesDb.getDesConnection();
 		String sql = "insert into T_LN_5IN12_MISSANALYSIS (ISSUE_NUMBER,GROUP_NUMBER,CURRENT_MISS,MAX_MISS,TYPE) values(?,?,?,?,?)";
@@ -247,42 +172,6 @@ public class Data2Db {
 		
 	}
 	
-	/** 
-	  * @Description: 判断库中是否有该条记录
-	  * @author songj@sdfcp.com
-	  * @date Feb 15, 2016 4:39:24 PM 
-	  * @param issueId
-	  * @param conn
-	  * @return
-	  * @throws SQLException 
-	  */
-	private boolean haveDataInIssueId(String issueId,Connection conn) throws SQLException{
-		boolean flag = false;
-		int count = 0;
-		String sql = "SELECT COUNT(*) FROM T_LN_5IN11_NUMBER WHERE ISSUE_NUMBER = '"+issueId+"'";
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try {
-			pstmt = (PreparedStatement) conn.prepareStatement(sql);
-			rs = pstmt.executeQuery();
-			while(rs.next()){
-				count = rs.getInt(1);
-			}
-			if(count > 0){
-				flag = true;
-			}
-		} catch (SQLException e) {
-			LogUtil.error("haveDataInIssueId方法异常！"+e.getCause());
-		}finally{
-			if(rs != null && !rs.isClosed()){
-    			rs.close(); 
-			}
-			if(pstmt!=null && !pstmt.isClosed()){
-				pstmt.close(); 
-    		}
-		}
-		return flag;
-	}
 	/** 
 	  * @Description: 判断库中是否有该条记录
 	  * @author songj@sdfcp.com
@@ -340,18 +229,19 @@ public class Data2Db {
 				  stmt.addBatch("UPDATE T_LN_5IN12_MISSANALYSIS SET ISSUE_NUMBER = "+srcDataBean.getIssueId()+","
 				  		+ "CURRENT_MISS = CURRENT_MISS+1,OPTIONAL_COMPOUND = OPTIONAL_COMPOUND+1,"
 				  		+ "TWOCODE_COMPOUND=TWOCODE_COMPOUND+1,THREECODE_COMPOUND=THREECODE_COMPOUND+1;");
-				  stmt.addBatch(AnalysisMissUtil.updateGroupMiss(srcDataBean,2)[0]);  //任二
-				  String[] temp  =  AnalysisMissUtil.updateGroupMiss(srcDataBean,3);
-				  stmt.addBatch(temp[0]);  //任三
-				  stmt.addBatch(temp[1]);  //任三四码复式
-				  temp = AnalysisMissUtil.updateGroupMiss(srcDataBean,4);
-				  stmt.addBatch(temp[0]);  //任四
-				  stmt.addBatch(temp[1]);  //任四五码复式
-				  stmt.addBatch(AnalysisMissUtil.updateGroupMiss(srcDataBean,5)[0]);  //任五
+				  List<String> sqlList = null;
+				  sqlList = AnalysisMissUtil.updateGroupMiss(srcDataBean,2);
+				  sqlList.addAll(AnalysisMissUtil.updateGroupMiss(srcDataBean,3));
+				  sqlList.addAll(AnalysisMissUtil.updateGroupMiss(srcDataBean,4));
+				  sqlList.addAll(AnalysisMissUtil.updateGroupMiss(srcDataBean,5));
+				  for(String sql : sqlList){
+					  stmt.addBatch(sql);
+//					  System.out.println(sql);
+				  }
 				  stmt.addBatch(AnalysisMissUtil.updateGreatFiveGroupMiss(srcDataBean,6));  //任六
 				  stmt.addBatch(AnalysisMissUtil.updateGreatFiveGroupMiss(srcDataBean,7));  //任七
 				  stmt.addBatch(AnalysisMissUtil.updateGreatFiveGroupMiss(srcDataBean,8));  //任八
-				  temp = AnalysisMissUtil.updateBeforeRen2GroupMiss(srcDataBean);
+				  String[] temp = AnalysisMissUtil.updateBeforeRen2GroupMiss(srcDataBean);
 				  stmt.addBatch(temp[0]);   //前二组选
 				  stmt.addBatch(temp[1]);   //前二组选三码复式
 				  temp = AnalysisMissUtil.updateBeforeRen3GroupMiss(srcDataBean);

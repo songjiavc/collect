@@ -1,24 +1,32 @@
 /*** Eclipse Class Decompiler plugin, copyright (c) 2016 Chen Chao (cnfree2000@hotmail.com) ***/
 package liaoning.tenminute.fivein12;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class AnalysisMissUtil {
-	public static String[] updateGroupMiss(SrcDataBean srcDataBean, int n) {
-		String[] rtnSql = new String[2];
+	public static List<String> updateGroupMiss(SrcDataBean srcDataBean, int n) {
+		List<String> sqlList = new ArrayList<String>();
 		int[] noArr = getIntArr(srcDataBean);
 		String inStr = getGroupByNumber(noArr, n);
-		rtnSql[0] = "UPDATE T_LN_5IN12_MISSANALYSIS SET CURRENT_MISS = 0 WHERE TYPE = " + n + "  AND GROUP_NUMBER IN ("
-				+ inStr + ")";
+		sqlList.add("UPDATE T_LN_5IN12_MISSANALYSIS SET CURRENT_MISS = 0 WHERE TYPE = " + n + "  AND GROUP_NUMBER IN ("
+				+ inStr + ")");
 		if(n == 3){
-			//任三四码复式遗漏统计
-			rtnSql[1] = "UPDATE T_LN_5IN12_MISSANALYSIS SET OPTIONAL_COMPOUND = 0 WHERE TYPE = 4  AND GROUP_NUMBER LIKE '%" + translate(noArr[0]) + "%" + translate(noArr[1]) +  "%" + translate(noArr[2]) +  "%'";
+			//任三四码复式
+			List<String > likeGroupList = getLikeGroupByNumber(noArr,n);
+			for(String likeGroup : likeGroupList){
+				//任三四码
+				sqlList.add("UPDATE T_LN_5IN12_MISSANALYSIS SET OPTIONAL_COMPOUND = 0 WHERE TYPE = 4 AND GROUP_NUMBER LIKE ("+ likeGroup + ")");
+			}
+		}else if(n == 4){
+			List<String > likeGroupList = getLikeGroupByNumber(noArr,n);
+			for(String likeGroup : likeGroupList){
+				//任四五码复式
+				sqlList.add("UPDATE T_LN_5IN12_MISSANALYSIS SET OPTIONAL_COMPOUND = 0 WHERE TYPE IN (5,6) AND GROUP_NUMBER LIKE ("+ likeGroup + ")");
+			}
 		}
-		if(n == 4){
-			//任四五码复式
-			rtnSql[1] = "UPDATE T_LN_5IN12_MISSANALYSIS SET OPTIONAL_COMPOUND = 0 WHERE TYPE IN (5,6)  AND GROUP_NUMBER LIKE '%" + translate(noArr[0]) + "%" + translate(noArr[1]) +  "%" + translate(noArr[2])+  "%" + translate(noArr[3]) +  "%'";
-		}
-		return rtnSql;
+		return sqlList;
 	}
 
 	public static String updateGreatFiveGroupMiss(SrcDataBean srcDataBean, int n) {
@@ -159,5 +167,29 @@ public class AnalysisMissUtil {
 		}
 
 		return rtn;
+	}
+	
+	public static List<String> getLikeGroupByNumber(int[] arr, int n) {
+		List<String> rtnList = new ArrayList<String>();
+		if (arr.length > 0) {
+			for (int i = 0; i < arr.length; ++i) {
+				for (int j = i + 1; j < arr.length; ++j) {
+					if (n == 2) {
+						rtnList.add("'%" + translate(arr[i]) + "%" + translate(arr[j]) + "%'");
+					} else {
+						for (int z = j + 1; z < arr.length; ++z) {
+							if (n == 3) {
+								rtnList.add("'%" + translate(arr[i]) + "%" + translate(arr[j]) +"%" + translate(arr[z]) + "%'");
+							}else {
+								for (int o = z + 1; o < arr.length; ++o){
+									rtnList.add("'%" + translate(arr[i]) + "%" + translate(arr[j]) +"%" + translate(arr[z]) +"%" + translate(arr[o]) + "%'");
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		return rtnList;
 	}
 }
